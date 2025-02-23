@@ -1,0 +1,11 @@
+services:
+  cdk-base:
+    build: .
+    image: cdk-base
+    command: ${COMPOSE_COMMAND:-bash}
+    environment:
+      CONFIG_FILE: ${CONFIG_FILE}
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock #Needed so a docker container can be run from inside a docker container
+      - ~/.aws/:/root/.aws:ro
