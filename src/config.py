@@ -5,6 +5,7 @@ from confz import BaseConfig, FileSource
 class SYWallaConfig(BaseConfig):
     account_id: str
     region: str
+    student_name: str = "Sergio Yunta Martin"
     name: str
     stage: str
 

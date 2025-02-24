@@ -14,6 +14,17 @@ authors = [
 [tool.poetry]
 package-mode = false
 
+[tool.poetry.dependencies]
+aws-cdk-lib = "2.179.0"
+constructs = "~10"
+confz = "2.1.0"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+boto3 = "*"
+
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
