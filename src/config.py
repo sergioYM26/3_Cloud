@@ -3,6 +3,8 @@ from confz import BaseConfig, FileSource
 
 
 class SYWallaConfig(BaseConfig):
+    account_id: str
+    region: str
     name: str
     stage: str
 

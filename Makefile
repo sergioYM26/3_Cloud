@@ -1,6 +1,6 @@
 SHELL=/bin/bash
 CDK_DIR=src/
-COMPOSE_RUN = docker compose run --build --rm cdk-base
+COMPOSE_RUN = docker compose run --rm cdk-base
 
 _prep-cache: #This resolves Error: EACCES: permission denied, open 'cdk.out/tree.json'
 	mkdir -p ${CDK_DIR}cdk.out/
@@ -24,7 +24,7 @@ pip-install: _prep-cache
 	${COMPOSE_RUN} make _pip-install
 
 _pip-install:
-	python3 -m venv .venv && source .venv/bin/activate && pip install . $$ cd ${CDK_DIR}
+	python3 -m venv .venv && source .venv/bin/activate && pip install poetry && poetry install
 
 npm-update: _prep-cache
 	${COMPOSE_RUN} make _npm-update
@@ -35,8 +35,8 @@ _npm-update:
 synth: _prep-cache
 	${COMPOSE_RUN} make _synth
 
-_synth:
-	cd ${CDK_DIR} && cdk synth --no-staging ${PROFILE}
+_synth: _pip-install
+	source .venv/bin/activate && cd ${CDK_DIR} && cdk synth --no-staging ${PROFILE}
 
 bootstrap: _prep-cache
 	${COMPOSE_RUN} make _bootstrap
