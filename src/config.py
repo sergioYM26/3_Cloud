@@ -8,6 +8,7 @@ class SYWallaConfig(BaseConfig):
     student_name: str = "Sergio Yunta Martin"
     name: str
     stage: str
+    ad_creation_days_to_expire: str
 
     CONFIG_SOURCES = [
         FileSource(

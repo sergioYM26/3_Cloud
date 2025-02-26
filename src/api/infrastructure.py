@@ -1,8 +1,8 @@
 import os
 from constructs import Construct
 import aws_cdk.aws_apigateway as apigateway
-import aws_cdk.aws_lambda as _lambda
 from config import SYWallaConfig
+from api.create_lambdas import ApiLambdas
 
 RUNTIME_PATH = f"{os.path.dirname(os.path.realpath(__file__))}/runtime"
 
@@ -17,28 +17,16 @@ class Api(Construct):
         *,
         config: SYWallaConfig,
         ads_table: str,
+        images_bucket: str,
         **kwargs,
     ) -> None:
         super().__init__(scope, id, **kwargs)
 
-        self.list_ads = _lambda.DockerImageFunction(
+        self.lambdas = ApiLambdas(
             self,
-            f"{config.name}-{config.stage}-list-ads-lambda",
-            function_name=f"{config.name}-{config.stage}-list-ads-lambda",
-            code=_lambda.DockerImageCode.from_image_asset(
-                f"{RUNTIME_PATH}/list_ads"
-            ),
-            environment={"TABLE_NAME": ads_table},
-        )
-
-        self.create_ad = _lambda.DockerImageFunction(
-            self,
-            f"{config.name}-{config.stage}-create-ad-lambda",
-            function_name=f"{config.name}-{config.stage}-create-ad-lambda",
-            code=_lambda.DockerImageCode.from_image_asset(
-                f"{RUNTIME_PATH}/create_ad"
-            ),
-            environment={"TABLE_NAME": ads_table},
+            config=config,
+            ads_table=ads_table,
+            images_bucket=images_bucket,
         )
 
         # API Gateway REST API
@@ -49,6 +37,9 @@ class Api(Construct):
             default_cors_preflight_options=apigateway.CorsOptions(
                 allow_methods=["GET", "OPTIONS"],
                 allow_origins=apigateway.Cors.ALL_ORIGINS,
+            ),
+            deploy_options=apigateway.StageOptions(
+                stage_name=config.stage,
             ),
         )
 
@@ -67,11 +58,16 @@ class Api(Construct):
 
         # Advertisements - Integrations
         list_ads_integration = apigateway.LambdaIntegration(
-            self.list_ads,
+            self.lambdas.list_ads,
             integration_responses=[default_integration_response],
         )
         create_ad_integration = apigateway.LambdaIntegration(
-            self.create_ad,
+            self.lambdas.create_ad,
+            integration_responses=[default_integration_response],
+        )
+
+        get_ad_integration = apigateway.LambdaIntegration(
+            self.lambdas.get_ad,
             integration_responses=[default_integration_response],
         )
 
@@ -87,16 +83,48 @@ class Api(Construct):
             create_ad_integration,
             method_responses=[default_method_response],
         )
-        ad_id_resource = ad_resource.add_resource("{id}")
-        ad_id_resource.add_method("GET")
+        ad_id_resource = ad_resource.add_resource("{ad_id}")
+        ad_id_resource.add_method(
+            "GET",
+            get_ad_integration,
+            method_responses=[default_method_response],
+        )
 
-        # Comments
+        # Comments - Integrations
+        post_comment_integration = apigateway.LambdaIntegration(
+            self.lambdas.post_comment,
+            integration_responses=[default_integration_response],
+        )
+
+        # Comments - resources
         comment_resource = ad_id_resource.add_resource("comment")
-        comment_resource.add_method("POST")
-        comment_resource.add_method("GET")
+        comment_resource.add_method(
+            "POST",
+            post_comment_integration,
+            method_responses=[default_method_response],
+        )
 
-        # Chat
+        # Chat - Integrations
+        get_chat_messages_integration = apigateway.LambdaIntegration(
+            self.lambdas.get_chat_messages,
+            integration_responses=[default_integration_response],
+        )
+
+        post_chat_message_integration = apigateway.LambdaIntegration(
+            self.lambdas.post_chat_message,
+            integration_responses=[default_integration_response],
+        )
+
+        # Chat - resources
         chat_resource = api.root.add_resource("chat")
-        chat_id_resource = chat_resource.add_resource("{id}")
-        chat_id_resource.add_method("POST")
-        chat_id_resource.add_method("GET")
+        chat_id_resource = chat_resource.add_resource("{chat_id}")
+        chat_id_resource.add_method(
+            "GET",
+            get_chat_messages_integration,
+            method_responses=[default_method_response],
+        )
+        chat_id_resource.add_method(
+            "POST",
+            post_chat_message_integration,
+            method_responses=[default_method_response],
+        )

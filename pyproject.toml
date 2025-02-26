@@ -24,6 +24,7 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 boto3 = "*"
+shortuuid = "1.0.13"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.

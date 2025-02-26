@@ -28,3 +28,19 @@ class Databases(Construct):
         cdk.Tags.of(self.advertisements).add(
             "Student-NAME", config.student_name
         )
+
+        # chats dynamodb database
+        self.chats = dynamodb.Table(
+            self,
+            f"{config.name}-{config.stage}-chats",
+            table_name=f"{config.name}-{config.stage}-chats",
+            partition_key=dynamodb.Attribute(
+                name="chat_id", type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=cdk.RemovalPolicy.DESTROY,
+        )
+
+        cdk.Tags.of(self.advertisements).add(
+            "Student-NAME", config.student_name
+        )

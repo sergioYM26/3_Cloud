@@ -2,7 +2,7 @@
 
 import aws_cdk as cdk
 
-from core.component import SYWallaslsStack
+from component import SYWallaslsStack
 from config import SYWallaConfig
 
 config = SYWallaConfig()

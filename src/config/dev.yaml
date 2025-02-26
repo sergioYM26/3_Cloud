@@ -1,6 +1,8 @@
 account_id: "122155218386"
 region: "eu-west-1"
 
-name: "SY-wallasls"
+name: "sy-wallasls"
 student_name: "Sergio Yunta Martin"
 stage: "dev"
+
+ad_creation_days_to_expire: "1" # Fails if not a string for some reason
