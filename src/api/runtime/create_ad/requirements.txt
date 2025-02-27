@@ -1,0 +1,3 @@
+setuptools
+shortuuid==1.0.3
+pillow==11.1.0

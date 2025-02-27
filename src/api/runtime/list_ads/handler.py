@@ -22,4 +22,4 @@ def handler(event, context):
         The HTTP response of the lambda function.
     """
     items = table.scan().get("Items", [])
-    return {"statusCode": 200, "body": json.dumps(items)}
+    return {"statusCode": 200, "body": json.dumps(items, default=int)}

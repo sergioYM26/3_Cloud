@@ -2,11 +2,13 @@ import os
 import json
 import boto3
 
+from base64 import b64encode
+
 dynamo_table = os.environ["TABLE_NAME"]
 images_bucket = os.environ["IMAGES_BUCKET"]
 
 table = boto3.resource("dynamodb").Table(dynamo_table)
-bucket = boto3.resource("s3").Bucket(images_bucket)
+s3 = boto3.client("s3")
 
 
 def handler(event, context):
@@ -36,10 +38,15 @@ def handler(event, context):
             "body": json.dumps({"error": "Ad not found"}),
         }
 
-    # bucket.get_object(Bucket=images_bucket, Key=f"{ad_id}/image.jpg") TODO: Implement this
+    try:
+        image_obj = s3.get_object(Bucket=images_bucket, Key=f"{ad_id}.jpeg")
+        image = image_obj["Body"].read()
+        advertisement["image"] = b64encode(image).decode("utf-8")
+    except s3.exceptions.NoSuchKey:
+        advertisement["image"] = None
 
     return {
         "statusCode": 200,
         "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": json.dumps(advertisement),
+        "body": json.dumps(advertisement, default=int),
     }

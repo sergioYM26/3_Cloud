@@ -3,14 +3,18 @@ import json
 import datetime
 
 import boto3
-import uuid
+import shortuuid
+
+from PIL import Image
+from io import BytesIO
+from base64 import b64decode
 
 dynamo_table = os.environ["TABLE_NAME"]
 images_bucket = os.environ["IMAGES_BUCKET"]
 days_to_expire = os.environ["DAYS_TO_EXPIRE"]
 
 table = boto3.resource("dynamodb").Table(dynamo_table)
-bucket = boto3.resource("s3").Bucket(images_bucket)
+s3 = boto3.client("s3")
 
 
 def handler(event, context):
@@ -27,22 +31,21 @@ def handler(event, context):
     dict
         The HTTP response of the lambda function.
     """
-    print("Received event: " + json.dumps(event, indent=2))
+    print("Received event: " + json.dumps(event))
 
-    new_ad_id = str(uuid.uuid4())
+    new_ad_id = shortuuid.uuid()
 
     # Ensure the generated ad_id is unique
     while table.get_item(Key={"ad_id": new_ad_id}).get("Item"):
-        new_ad_id = str(uuid.uuid4())
+        new_ad_id = shortuuid.uuid()
 
-    ad_data = event["body"]
+    ad_data = json.loads(event["body"])
 
     new_ad = {
         "ad_id": new_ad_id,
         "title": ad_data["title"],
         "description": ad_data["description"],
         "price": ad_data["price"],
-        "image": ad_data["image"],
         "creationDate": int(datetime.datetime.now().timestamp()),
         "expireAt": int(
             (
@@ -51,6 +54,17 @@ def handler(event, context):
             ).timestamp()
         ),
     }
+
+    image = ad_data.get("image")
+    image_name = ad_data.get("imageName")
+    if image and image_name:
+        im = Image.open(BytesIO(b64decode(image)))
+        im.thumbnail((300, 300))
+        in_memory_file = BytesIO()
+        im.save(in_memory_file, "JPEG")
+        in_memory_file.seek(0)
+
+        s3.upload_fileobj(in_memory_file, images_bucket, f"{new_ad_id}.jpeg")
 
     table.put_item(Item=new_ad)
 

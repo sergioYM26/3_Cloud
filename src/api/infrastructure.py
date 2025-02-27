@@ -72,7 +72,7 @@ class Api(Construct):
         )
 
         # Advertisements - resources
-        ad_resource = api.root.add_resource("ad")
+        ad_resource = api.root.add_resource("ads")
         ad_resource.add_method(
             "GET",
             list_ads_integration,
@@ -97,7 +97,7 @@ class Api(Construct):
         )
 
         # Comments - resources
-        comment_resource = ad_id_resource.add_resource("comment")
+        comment_resource = ad_id_resource.add_resource("comments")
         comment_resource.add_method(
             "POST",
             post_comment_integration,
@@ -116,7 +116,7 @@ class Api(Construct):
         )
 
         # Chat - resources
-        chat_resource = api.root.add_resource("chat")
+        chat_resource = api.root.add_resource("chats")
         chat_id_resource = chat_resource.add_resource("{chat_id}")
         chat_id_resource.add_method(
             "GET",

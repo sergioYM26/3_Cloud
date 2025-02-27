@@ -31,13 +31,13 @@ class SYWallaslsStack(Stack):
             images_bucket=images.images_bucket.bucket_name,
         )
 
-        databases.advertisements.grant_write_data(api.lambdas.create_ad)
-        databases.advertisements.grant_read_data(api.lambdas.list_ads)
-        databases.advertisements.grant_read_data(api.lambdas.get_ad)
-        databases.advertisements.grant_write_data(api.lambdas.post_comment)
+        databases.advertisements.grant_read_write_data(api.lambdas.create_ad)
+        databases.advertisements.grant_read_write_data(api.lambdas.list_ads)
+        databases.advertisements.grant_read_write_data(api.lambdas.get_ad)
+        databases.advertisements.grant_read_write_data(api.lambdas.post_comment)
 
-        databases.chats.grant_write_data(api.lambdas.post_chat_message)
-        databases.chats.grant_read_data(api.lambdas.get_chat_messages)
+        databases.chats.grant_read_write_data(api.lambdas.post_chat_message)
+        databases.chats.grant_read_write_data(api.lambdas.get_chat_messages)
 
-        images.images_bucket.grant_write(api.lambdas.create_ad)
-        images.images_bucket.grant_read(api.lambdas.get_ad)
+        images.images_bucket.grant_read_write(api.lambdas.create_ad)
+        images.images_bucket.grant_read_write(api.lambdas.get_ad)

@@ -26,12 +26,6 @@ pip-install: _prep-cache
 _pip-install:
 	python3 -m venv .venv && source .venv/bin/activate && pip install poetry && poetry install
 
-npm-update: _prep-cache
-	${COMPOSE_RUN} make _npm-update
-
-_npm-update:
-	cd ${CDK_DIR} && npm update
-
 synth: _prep-cache
 	${COMPOSE_RUN} make _synth
 
@@ -42,30 +36,30 @@ bootstrap: _prep-cache
 	${COMPOSE_RUN} make _bootstrap
 
 _bootstrap:
-	cd ${CDK_DIR} && cdk bootstrap ${PROFILE}
+	source .venv/bin/activate && cd ${CDK_DIR} && cdk bootstrap ${PROFILE}
 
 deploy: _prep-cache
 	${COMPOSE_RUN} make _deploy
 
-_deploy: 
-	cd ${CDK_DIR} && cdk deploy --require-approval never ${PROFILE}
+_deploy: _pip-install
+	source .venv/bin/activate && cd ${CDK_DIR} && cdk deploy --require-approval never ${PROFILE}
 
-destroy:
+destroy: _prep-cache
 	${COMPOSE_RUN} make _destroy
 
-_destroy:
-	cd ${CDK_DIR} && cdk destroy --force ${PROFILE}
+_destroy: _pip-install
+	source .venv/bin/activate && cd ${CDK_DIR} && cdk destroy --force ${PROFILE}
 
 diff: _prep-cache
 	${COMPOSE_RUN} make _diff
 
-_diff: _prep-cache
-	cd ${CDK_DIR} && cdk diff ${PROFILE}
+_diff: _pip-install
+	source .venv/bin/activate && cd ${CDK_DIR} && cdk diff ${PROFILE}
 
-test: 
+test: _prep-cache
 	${COMPOSE_RUN} make _test
 
-_test: 
-	cd ${CDK_DIR} && npm test 
+_test: _pip-install
+	source .venv/bin/activate && cd ${CDK_DIR} && pytest run
 
 
