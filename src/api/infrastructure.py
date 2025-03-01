@@ -17,6 +17,7 @@ class Api(Construct):
         *,
         config: SYWallaConfig,
         ads_table: str,
+        comments_table: str,
         images_bucket: str,
         **kwargs,
     ) -> None:
@@ -26,6 +27,7 @@ class Api(Construct):
             self,
             config=config,
             ads_table=ads_table,
+            comments_table=comments_table,
             images_bucket=images_bucket,
         )
 

@@ -15,6 +15,7 @@ class ApiLambdas:
         *,
         config: SYWallaConfig,
         ads_table: str,
+        comments_table: str,
         images_bucket: str,
     ) -> None:
         # Advertisements - Lambdas
@@ -50,7 +51,8 @@ class ApiLambdas:
                 f"{RUNTIME_PATH}/get_ad"
             ),
             environment={
-                "TABLE_NAME": ads_table,
+                "TABLE_NAME_ADS": ads_table,
+                "TABLE_NAME_COMMENTS": comments_table,
                 "IMAGES_BUCKET": images_bucket,
             },
         )
@@ -63,7 +65,7 @@ class ApiLambdas:
             code=_lambda.DockerImageCode.from_image_asset(
                 f"{RUNTIME_PATH}/post_comment"
             ),
-            environment={"TABLE_NAME": ads_table},
+            environment={"TABLE_NAME": comments_table},
         )
 
         # Chat - Lambdas

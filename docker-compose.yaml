@@ -4,6 +4,8 @@ services:
     image: cdk-base
     command: ${COMPOSE_COMMAND:-bash}
     environment:
+      ACCOUNT: ${ACCOUNT}
+      REGION: ${REGION}
       CONFIG_FILE: ${CONFIG_FILE}
     volumes:
       - .:/app

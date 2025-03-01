@@ -59,7 +59,7 @@ def handler(event, context):
     image_name = ad_data.get("imageName")
     if image and image_name:
         im = Image.open(BytesIO(b64decode(image)))
-        im.thumbnail((300, 300))
+        im.thumbnail((300, 300))  # Resize image to 300x300
         in_memory_file = BytesIO()
         im.save(in_memory_file, "JPEG")
         in_memory_file.seek(0)
@@ -71,5 +71,7 @@ def handler(event, context):
     return {
         "statusCode": 200,
         "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": json.dumps(new_ad),
+        "body": json.dumps(
+            {"message": f"Ad created successfully with id: {new_ad_id}"}
+        ),
     }

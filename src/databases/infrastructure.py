@@ -5,8 +5,6 @@ from constructs import Construct
 from config import SYWallaConfig
 
 import aws_cdk.aws_dynamodb as dynamodb
-import aws_cdk.aws_lambda as _lambda
-import aws_cdk.aws_lambda_event_sources as lambda_events
 
 RUNTIME_PATH = f"{os.path.dirname(os.path.realpath(__file__))}/runtime"
 
@@ -54,40 +52,40 @@ class Databases(Construct):
             "Student-NAME", config.student_name
         )
 
-        # Clean up lambda dynamodb database
-        self.cleanup_lambda = _lambda.DockerImageFunction(
-            self,
-            f"{config.name}-{config.stage}-on-delete-cleanup-lambda",
-            function_name=f"{config.name}-{config.stage}-on-delete-cleanup-lambda",
-            code=_lambda.DockerImageCode.from_image_asset(
-                f"{RUNTIME_PATH}/on_delete_cleanup"
-            ),
-            environment={
-                "TABLE_NAME_ADS": self.advertisements.table_name,
-                "TABLE_NAME_COMMENTS": self.comments.table_name,
-                "IMAGES_BUCKET": "dummy",
-            },
-        )
+        # # Clean up lambda dynamodb database
+        # self.cleanup_lambda = _lambda.DockerImageFunction(
+        #     self,
+        #     f"{config.name}-{config.stage}-on-delete-cleanup-lambda",
+        #     function_name=f"{config.name}-{config.stage}-on-delete-cleanup-lambda",
+        #     code=_lambda.DockerImageCode.from_image_asset(
+        #         f"{RUNTIME_PATH}/on_delete_cleanup"
+        #     ),
+        #     environment={
+        #         "TABLE_NAME_ADS": self.advertisements.table_name,
+        #         "TABLE_NAME_COMMENTS": self.comments.table_name,
+        #         "IMAGES_BUCKET": "dummy",
+        #     },
+        # )
 
-        self.cleanup_lambda.add_event_source(
-            source=lambda_events.DynamoEventSource(
-                self.advertisements,
-                filters=[
-                    {
-                        "Pattern": {
-                            "userIdentity": {
-                                "type": ["Service"],
-                                "principalId": ["dynamodb.amazonaws.com"],
-                            }
-                        }
-                    }
-                ],
-                starting_position=_lambda.StartingPosition.LATEST,
-            )
-        )
+        # self.cleanup_lambda.add_event_source(
+        #     source=lambda_events.DynamoEventSource(
+        #         self.advertisements,
+        #         filters=[
+        #             {
+        #                 "Pattern": {
+        #                     "userIdentity": {
+        #                         "type": ["Service"],
+        #                         "principalId": ["dynamodb.amazonaws.com"],
+        #                     }
+        #                 }
+        #             }
+        #         ],
+        #         starting_position=_lambda.StartingPosition.LATEST,
+        #     )
+        # )
 
-        self.advertisements.grant_read_write_data(self.cleanup_lambda)
-        self.comments.grant_read_write_data(self.cleanup_lambda)  # S3 LEFT
+        # self.advertisements.grant_read_write_data(self.cleanup_lambda)
+        # self.comments.grant_read_write_data(self.cleanup_lambda)  # S3 LEFT
 
         # chats dynamodb database
         self.chats = dynamodb.Table(

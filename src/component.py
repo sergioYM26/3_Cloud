@@ -28,6 +28,7 @@ class SYWallaslsStack(Stack):
             "Api",
             config=config,
             ads_table=databases.advertisements.table_name,
+            comments_table=databases.comments.table_name,
             images_bucket=images.images_bucket.bucket_name,
         )
 
@@ -35,6 +36,9 @@ class SYWallaslsStack(Stack):
         databases.advertisements.grant_read_write_data(api.lambdas.list_ads)
         databases.advertisements.grant_read_write_data(api.lambdas.get_ad)
         databases.advertisements.grant_read_write_data(api.lambdas.post_comment)
+
+        databases.comments.grant_read_write_data(api.lambdas.post_comment)
+        databases.comments.grant_read_write_data(api.lambdas.get_ad)
 
         databases.chats.grant_read_write_data(api.lambdas.post_chat_message)
         databases.chats.grant_read_write_data(api.lambdas.get_chat_messages)
