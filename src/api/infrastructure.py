@@ -1,6 +1,10 @@
 import os
-from constructs import Construct
+import aws_cdk as cdk
 import aws_cdk.aws_apigateway as apigateway
+from aws_cdk.aws_cognito import UserPool
+from constructs import Construct
+
+
 from config import SYWallaConfig
 from api.create_lambdas import ApiLambdas
 
@@ -16,6 +20,7 @@ class Api(Construct):
         id: str,
         *,
         config: SYWallaConfig,
+        user_pool: UserPool,
         ads_table: str,
         comments_table: str,
         images_bucket: str,
@@ -43,6 +48,15 @@ class Api(Construct):
             deploy_options=apigateway.StageOptions(
                 stage_name=config.stage,
             ),
+        )
+
+        authorizer = apigateway.CognitoUserPoolsAuthorizer(
+            self,
+            f"{config.name}-{config.stage}-authorizer",
+            authorizer_name=f"{config.name}-{config.stage}-authorizer",
+            cognito_user_pools=[user_pool],
+            identity_source="method.request.header.Authorization",
+            results_cache_ttl=cdk.Duration.minutes(5),
         )
 
         default_integration_response = apigateway.IntegrationResponse(
@@ -79,17 +93,26 @@ class Api(Construct):
             "GET",
             list_ads_integration,
             method_responses=[default_method_response],
+            authorizer=authorizer,
+            authorization_type=apigateway.AuthorizationType.COGNITO,
+            authorization_scopes=["openid", "email", "profile"],
         )
         ad_resource.add_method(
             "POST",
             create_ad_integration,
             method_responses=[default_method_response],
+            authorizer=authorizer,
+            authorization_type=apigateway.AuthorizationType.COGNITO,
+            authorization_scopes=["openid", "email", "profile"],
         )
         ad_id_resource = ad_resource.add_resource("{ad_id}")
         ad_id_resource.add_method(
             "GET",
             get_ad_integration,
             method_responses=[default_method_response],
+            authorizer=authorizer,
+            authorization_type=apigateway.AuthorizationType.COGNITO,
+            authorization_scopes=["openid", "email", "profile"],
         )
 
         # Comments - Integrations
@@ -104,6 +127,9 @@ class Api(Construct):
             "POST",
             post_comment_integration,
             method_responses=[default_method_response],
+            authorizer=authorizer,
+            authorization_type=apigateway.AuthorizationType.COGNITO,
+            authorization_scopes=["openid", "email", "profile"],
         )
 
         # Chat - Integrations
@@ -124,9 +150,15 @@ class Api(Construct):
             "GET",
             get_chat_messages_integration,
             method_responses=[default_method_response],
+            authorizer=authorizer,
+            authorization_type=apigateway.AuthorizationType.COGNITO,
+            authorization_scopes=["openid", "email", "profile"],
         )
         chat_id_resource.add_method(
             "POST",
             post_chat_message_integration,
             method_responses=[default_method_response],
+            authorizer=authorizer,
+            authorization_type=apigateway.AuthorizationType.COGNITO,
+            authorization_scopes=["openid", "email", "profile"],
         )

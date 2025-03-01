@@ -9,6 +9,7 @@ class SYWallaConfig(BaseConfig):
     name: str
     stage: str
     ad_creation_days_to_expire: str
+    web_domain: str
 
     CONFIG_SOURCES = [
         FileSource(

@@ -8,6 +8,7 @@ from config import SYWallaConfig
 
 from databases.infrastructure import Databases
 from images.infrastructure import Images
+from users.infrastructure import Users
 from api.infrastructure import Api
 
 
@@ -23,10 +24,12 @@ class SYWallaslsStack(Stack):
 
         databases = Databases(self, "Databases", config=config)
         images = Images(self, "Images", config=config)
+        users = Users(self, "Users", config=config)
         api = Api(
             self,
             "Api",
             config=config,
+            user_pool=users.user_pool,
             ads_table=databases.advertisements.table_name,
             comments_table=databases.comments.table_name,
             images_bucket=images.images_bucket.bucket_name,

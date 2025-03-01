@@ -2,7 +2,7 @@ import os
 import json
 
 import boto3
-
+from boto3.dynamodb.conditions import Key
 
 ads_table_name = os.environ["TABLE_NAME_ADS"]
 comments_table_name = os.environ["TABLE_NAME_COMMENTS"]
@@ -40,9 +40,7 @@ def handler(event, context):
 
             # Delete the ad comments
             comments = comments_table.query(
-                TableName=comments_table_name,
-                KeyConditionExpression="ad_id = :target_ad_id",
-                ExpressionAttributeValues={":target_ad_id": ad_id},
+                KeyConditionExpression=Key("ad_id").eq(ad_id)
             )["Items"]
 
             for comment in comments:

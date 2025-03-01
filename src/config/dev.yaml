@@ -6,3 +6,5 @@ student_name: "Sergio Yunta Martin"
 stage: "dev"
 
 ad_creation_days_to_expire: "1" # Fails if not a string for some reason
+
+web_domain: "https://sy.walla.com"

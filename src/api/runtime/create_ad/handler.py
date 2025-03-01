@@ -33,6 +33,18 @@ def handler(event, context):
     """
     print("Received event: " + json.dumps(event))
 
+    if (
+        "advertisers-group"
+        not in event["requestContext"]["authorizer"]["claims"]["cognito:groups"]
+    ):
+        return {
+            "statusCode": 403,
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "body": json.dumps({"error": "Forbidden"}),
+        }
+
+    username = event["requestContext"]["authorizer"]["claims"]["username"]
+
     new_ad_id = shortuuid.uuid()
 
     # Ensure the generated ad_id is unique
@@ -43,6 +55,7 @@ def handler(event, context):
 
     new_ad = {
         "ad_id": new_ad_id,
+        "author": username,
         "title": ad_data["title"],
         "description": ad_data["description"],
         "price": ad_data["price"],

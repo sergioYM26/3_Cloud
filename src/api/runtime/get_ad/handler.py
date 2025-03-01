@@ -29,7 +29,7 @@ def handler(event, context):
     dict
         The HTTP response of the lambda function.
     """
-    print("Received event: " + json.dumps(event, indent=2))
+    print("Received event: " + json.dumps(event))
 
     ad_id = event["pathParameters"]["ad_id"]
 
