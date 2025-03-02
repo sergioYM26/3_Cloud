@@ -1,7 +1,7 @@
-name: "sy-walla"
+name: "sy-wallaaaa"
 student_name: "Sergio Yunta Martin"
-stage: "dev"
+stage: "pro"
 
 ad_creation_days_to_expire: "1" # Fails if not a string for some reason
 
-web_domain: "https://sy.walla.com"
+web_domain: "https://sy.prod.walla.com"

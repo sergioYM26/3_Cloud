@@ -33,10 +33,11 @@ def handler(event, context):
     """
     print("Received event: " + json.dumps(event))
 
-    if (
-        "advertisers-group"
-        not in event["requestContext"]["authorizer"]["claims"]["cognito:groups"]
-    ):
+    group = event["requestContext"]["authorizer"]["claims"].get(
+        "cognito:groups"
+    )
+
+    if group is None or "advertisers-group" not in group:
         return {
             "statusCode": 403,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -69,8 +70,7 @@ def handler(event, context):
     }
 
     image = ad_data.get("image")
-    image_name = ad_data.get("imageName")
-    if image and image_name:
+    if image:
         im = Image.open(BytesIO(b64decode(image)))
         im.thumbnail((300, 300))  # Resize image to 300x300
         in_memory_file = BytesIO()

@@ -10,7 +10,7 @@ chats_table = boto3.resource("dynamodb").Table(dynamo_table)
 
 def handler(event, context):
     """
-    Get all messages from a chat
+    Get all chats where the user is involved
 
     Parameters
     ----------
@@ -25,23 +25,21 @@ def handler(event, context):
     """
     print("Received event: " + json.dumps(event))
 
-    chat_id = event.get("pathParameters", {}).get("chat_id")
-    if not chat_id:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({"error": "chat_id is required"}),
-        }
+    user = event["requestContext"]["authorizer"]["claims"]["username"]
 
-    # Get all messages from the chat
-    messages = chats_table.query(
-        KeyConditionExpression=Key("chat_id").eq(chat_id)
-    )["Items"]
-
-    messages = [
-        message for message in messages if message["data"].startswith("MSG_")
+    # Get all chats where the user is involved
+    chats = chats_table.scan(FilterExpression=Key("data").begins_with("USR_"))[
+        "Items"
     ]
+
+    chats_user = []
+    for chat in chats:
+        if user in chat["data"]:
+            chats_user.append(
+                {"chat_id": chat["chat_id"], "users": chat["data"]}
+            )
 
     return {
         "statusCode": 200,
-        "body": json.dumps({"messages": messages}, default=int),
+        "body": json.dumps(chats_user, default=int),
     }

@@ -7,7 +7,7 @@ RUNTIME_PATH = f"{os.path.dirname(os.path.realpath(__file__))}/runtime"
 
 
 class ApiLambdas:
-    """."""
+    """Class that instantiates lambdas that are needed for the API."""
 
     def __init__(
         self,
@@ -16,6 +16,7 @@ class ApiLambdas:
         config: SYWallaConfig,
         ads_table: str,
         comments_table: str,
+        chats_table: str,
         images_bucket: str,
     ) -> None:
         # Advertisements - Lambdas
@@ -69,6 +70,16 @@ class ApiLambdas:
         )
 
         # Chat - Lambdas
+        self.get_chats = _lambda.DockerImageFunction(
+            scope,
+            f"{config.name}-{config.stage}-get-chats-lambda",
+            function_name=f"{config.name}-{config.stage}-get-chats-lambda",
+            code=_lambda.DockerImageCode.from_image_asset(
+                f"{RUNTIME_PATH}/get_chats"
+            ),
+            environment={"TABLE_NAME": chats_table},
+        )
+
         self.get_chat_messages = _lambda.DockerImageFunction(
             scope,
             f"{config.name}-{config.stage}-get-chat-messages-lambda",
@@ -76,7 +87,7 @@ class ApiLambdas:
             code=_lambda.DockerImageCode.from_image_asset(
                 f"{RUNTIME_PATH}/get_chat_messages"
             ),
-            environment={"TABLE_NAME": ads_table},
+            environment={"TABLE_NAME": chats_table},
         )
 
         self.post_chat_message = _lambda.DockerImageFunction(
@@ -86,5 +97,5 @@ class ApiLambdas:
             code=_lambda.DockerImageCode.from_image_asset(
                 f"{RUNTIME_PATH}/post_chat_message"
             ),
-            environment={"TABLE_NAME": ads_table},
+            environment={"TABLE_NAME": chats_table},
         )

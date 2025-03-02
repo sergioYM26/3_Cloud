@@ -5,14 +5,18 @@ from constructs import Construct
 from config import SYWallaConfig
 
 import aws_cdk.aws_dynamodb as dynamodb
+import aws_cdk.aws_lambda as _lambda
+import aws_cdk.aws_lambda_event_sources as lambda_events
 
 RUNTIME_PATH = f"{os.path.dirname(os.path.realpath(__file__))}/runtime"
 
 
 class Databases(Construct):
-    """."""
+    """Construct that creates all databases and needed resources."""
 
-    def __init__(self, scope, id, *, config: SYWallaConfig, **kwargs):
+    def __init__(
+        self, scope, id, *, config: SYWallaConfig, images_bucket: str, **kwargs
+    ):
         super().__init__(scope, id, **kwargs)
 
         # advertisements dynamodb database
@@ -52,48 +56,38 @@ class Databases(Construct):
             "Student-NAME", config.student_name
         )
 
-        # # Clean up lambda dynamodb database
-        # self.cleanup_lambda = _lambda.DockerImageFunction(
-        #     self,
-        #     f"{config.name}-{config.stage}-on-delete-cleanup-lambda",
-        #     function_name=f"{config.name}-{config.stage}-on-delete-cleanup-lambda",
-        #     code=_lambda.DockerImageCode.from_image_asset(
-        #         f"{RUNTIME_PATH}/on_delete_cleanup"
-        #     ),
-        #     environment={
-        #         "TABLE_NAME_ADS": self.advertisements.table_name,
-        #         "TABLE_NAME_COMMENTS": self.comments.table_name,
-        #         "IMAGES_BUCKET": "dummy",
-        #     },
-        # )
+        # Clean up lambda dynamodb database
+        self.cleanup_lambda = _lambda.DockerImageFunction(
+            self,
+            f"{config.name}-{config.stage}-on-delete-cleanup-lambda",
+            function_name=f"{config.name}-{config.stage}-on-delete-cleanup-lambda",
+            code=_lambda.DockerImageCode.from_image_asset(
+                f"{RUNTIME_PATH}/on_delete_cleanup"
+            ),
+            environment={
+                "TABLE_NAME_ADS": self.advertisements.table_name,
+                "TABLE_NAME_COMMENTS": self.comments.table_name,
+                "IMAGES_BUCKET": images_bucket,
+            },
+        )
 
-        # self.cleanup_lambda.add_event_source(
-        #     source=lambda_events.DynamoEventSource(
-        #         self.advertisements,
-        #         filters=[
-        #             {
-        #                 "Pattern": {
-        #                     "userIdentity": {
-        #                         "type": ["Service"],
-        #                         "principalId": ["dynamodb.amazonaws.com"],
-        #                     }
-        #                 }
-        #             }
-        #         ],
-        #         starting_position=_lambda.StartingPosition.LATEST,
-        #     )
-        # )
-
-        # self.advertisements.grant_read_write_data(self.cleanup_lambda)
-        # self.comments.grant_read_write_data(self.cleanup_lambda)  # S3 LEFT
+        self.cleanup_lambda.add_event_source(
+            source=lambda_events.DynamoEventSource(
+                self.advertisements,
+                starting_position=_lambda.StartingPosition.LATEST,
+            )
+        )
 
         # chats dynamodb database
         self.chats = dynamodb.Table(
             self,
-            f"{config.name}-{config.stage}-chats",
-            table_name=f"{config.name}-{config.stage}-chats",
+            f"{config.name}-{config.stage}-chats-data",
+            table_name=f"{config.name}-{config.stage}-chats-data",
             partition_key=dynamodb.Attribute(
                 name="chat_id", type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="data", type=dynamodb.AttributeType.STRING
             ),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
             removal_policy=cdk.RemovalPolicy.DESTROY,

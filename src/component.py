@@ -13,6 +13,8 @@ from api.infrastructure import Api
 
 
 class SYWallaslsStack(Stack):
+    """Stack definition, instantiates all the constructs."""
+
     def __init__(
         self,
         scope: Construct,
@@ -22,8 +24,13 @@ class SYWallaslsStack(Stack):
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        databases = Databases(self, "Databases", config=config)
         images = Images(self, "Images", config=config)
+        databases = Databases(
+            self,
+            "Databases",
+            config=config,
+            images_bucket=images.images_bucket.bucket_name,
+        )
         users = Users(self, "Users", config=config)
         api = Api(
             self,
@@ -32,6 +39,7 @@ class SYWallaslsStack(Stack):
             user_pool=users.user_pool,
             ads_table=databases.advertisements.table_name,
             comments_table=databases.comments.table_name,
+            chats_table=databases.chats.table_name,
             images_bucket=images.images_bucket.bucket_name,
         )
 
@@ -39,12 +47,16 @@ class SYWallaslsStack(Stack):
         databases.advertisements.grant_read_write_data(api.lambdas.list_ads)
         databases.advertisements.grant_read_write_data(api.lambdas.get_ad)
         databases.advertisements.grant_read_write_data(api.lambdas.post_comment)
+        databases.advertisements.grant_read_write_data(databases.cleanup_lambda)
 
         databases.comments.grant_read_write_data(api.lambdas.post_comment)
         databases.comments.grant_read_write_data(api.lambdas.get_ad)
+        databases.comments.grant_read_write_data(databases.cleanup_lambda)
 
+        databases.chats.grant_read_write_data(api.lambdas.get_chats)
         databases.chats.grant_read_write_data(api.lambdas.post_chat_message)
         databases.chats.grant_read_write_data(api.lambdas.get_chat_messages)
 
         images.images_bucket.grant_read_write(api.lambdas.create_ad)
         images.images_bucket.grant_read_write(api.lambdas.get_ad)
+        images.images_bucket.grant_read_write(databases.cleanup_lambda)

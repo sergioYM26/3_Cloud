@@ -15,7 +15,7 @@ s3 = boto3.client("s3")
 
 
 def handler(event, context):
-    """Insert a new advert into the dynamo db table.
+    """Delete comments and image when a ad entry is deleted.
 
     Parameters
     ----------
@@ -23,10 +23,6 @@ def handler(event, context):
         The event that triggered the lambda function.
     context: dict
         The context of the lambda function.
-    Returns
-    -------
-    dict
-        The HTTP response of the lambda function.
     """
     print("Received event: " + json.dumps(event))
 

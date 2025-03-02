@@ -2,18 +2,19 @@
 
 Esta es la documentación del proyecto del módulo `Cloud` del máster de Datahack  
 
-## Índice
+## Toda la documentación
 
 - [Diagrama de la arquitectura](#diagrama-de-la-arquitectura)
 - [Decisiones de diseño](docs/decisiones_de_diseno.md)
 - [Manual de despliegue](#manual-de-despliegue)
 - [Creación de usuarios](docs/creacion_usuarios.md)
+- [Testing](docs/testing.md)
 
 
 ## Diagrama de la arquitectura
 El diagrama de la arquitectura, en AWS es el siguiente:
 
-![Arquitectura_AWS_v2](docs/img/Arquitectura-cloud-SergioYunta-v2.jpg)
+![Arquitectura_AWS_v3](docs/img/Arquitectura-cloud-SergioYunta-v3.jpg)
 
 Se han intentado usar tecnologías serverless para todos los componentes de la arquitectura, esto en más detalle, junto con la separación por constructos está en el apartado de [decisiones de diseño](docs/decisiones_de_diseño.md)
 

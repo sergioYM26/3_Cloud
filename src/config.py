@@ -3,8 +3,8 @@ from confz import BaseConfig, FileSource
 
 
 class SYWallaConfig(BaseConfig):
-    account_id: str
-    region: str
+    """Configuration for the stack."""
+
     student_name: str = "Sergio Yunta Martin"
     name: str
     stage: str

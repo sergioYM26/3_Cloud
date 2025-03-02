@@ -6,6 +6,8 @@ from config import SYWallaConfig
 
 
 class Images(Construct):
+    """Construct that creates the bucket for the ads images."""
+
     def __init__(
         self, scope: Construct, id: str, *, config: SYWallaConfig, **kwargs
     ) -> None:

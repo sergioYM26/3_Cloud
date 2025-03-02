@@ -12,7 +12,7 @@ RUNTIME_PATH = f"{os.path.dirname(os.path.realpath(__file__))}/runtime"
 
 
 class Api(Construct):
-    """."""
+    """API Construct that creates the API Gateway and its resources."""
 
     def __init__(
         self,
@@ -23,6 +23,7 @@ class Api(Construct):
         user_pool: UserPool,
         ads_table: str,
         comments_table: str,
+        chats_table: str,
         images_bucket: str,
         **kwargs,
     ) -> None:
@@ -33,6 +34,7 @@ class Api(Construct):
             config=config,
             ads_table=ads_table,
             comments_table=comments_table,
+            chats_table=chats_table,
             images_bucket=images_bucket,
         )
 
@@ -133,30 +135,43 @@ class Api(Construct):
         )
 
         # Chat - Integrations
-        get_chat_messages_integration = apigateway.LambdaIntegration(
-            self.lambdas.get_chat_messages,
-            integration_responses=[default_integration_response],
-        )
-
         post_chat_message_integration = apigateway.LambdaIntegration(
             self.lambdas.post_chat_message,
             integration_responses=[default_integration_response],
         )
 
+        get_chats_integration = apigateway.LambdaIntegration(
+            self.lambdas.get_chats,
+            integration_responses=[default_integration_response],
+        )
+
+        get_chat_messages_integration = apigateway.LambdaIntegration(
+            self.lambdas.get_chat_messages,
+            integration_responses=[default_integration_response],
+        )
+
         # Chat - resources
         chat_resource = api.root.add_resource("chats")
-        chat_id_resource = chat_resource.add_resource("{chat_id}")
-        chat_id_resource.add_method(
+        chat_resource.add_method(
             "GET",
-            get_chat_messages_integration,
+            get_chats_integration,
             method_responses=[default_method_response],
             authorizer=authorizer,
             authorization_type=apigateway.AuthorizationType.COGNITO,
             authorization_scopes=["openid", "email", "profile"],
         )
-        chat_id_resource.add_method(
+        chat_resource.add_method(
             "POST",
             post_chat_message_integration,
+            method_responses=[default_method_response],
+            authorizer=authorizer,
+            authorization_type=apigateway.AuthorizationType.COGNITO,
+            authorization_scopes=["openid", "email", "profile"],
+        )
+        chat_id_resource = chat_resource.add_resource("{chat_id}")
+        chat_id_resource.add_method(
+            "GET",
+            get_chat_messages_integration,
             method_responses=[default_method_response],
             authorizer=authorizer,
             authorization_type=apigateway.AuthorizationType.COGNITO,
