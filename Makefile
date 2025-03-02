@@ -5,7 +5,7 @@ COMPOSE_RUN = docker compose run --rm cdk-base
 _prep-cache: #This resolves Error: EACCES: permission denied, open 'cdk.out/tree.json'
 	mkdir -p ${CDK_DIR}cdk.out/
 
-container-build: pre-reqs
+container-build:
 	docker-compose build
 
 container-info:
